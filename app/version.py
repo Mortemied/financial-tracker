@@ -2,4 +2,4 @@
 VERSION = '1.0.0'
 APP_NAME = 'Financial Tracker'
 # Set only when the repository has a real public URL; no placeholder link in UI.
-REPOSITORY_URL = ''
+REPOSITORY_URL = 'https://github.com/Mortemied/financial-tracker'
