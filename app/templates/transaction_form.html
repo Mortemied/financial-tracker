@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% from 'components.html' import csrf, icon with context %}
+{% block content %}
+<section class="page-heading">
+<div>
+<div class="eyebrow">{{ t('nav.transactions') }}</div>
+<h1>{{ t('duplicate' if duplicating else ('edit_transaction' if row else 'add_transaction')) }}</h1>
+<p>{{ t('transaction_subtitle') }}</p>
+</div>
+</section>
+<article class="card form-card">
+<div class="card-heading">
+<h2>{{ t('transaction_details') }}</h2>{{ icon('transactions') }}</div>
+<form method="post" action="{{ url_for('transactions.edit', transaction_id=row.id) if row else url_for('transactions.edit') }}" class="form-grid" id="transaction-form">{{ csrf() }}<label>{{ t('type') }}<select name="type" id="transaction-type" required>
+{% for kind in ['expense','income'] %}
+<option value="{{ kind }}" {{ 'selected' if values.get('type','expense') == kind }}>{{ t(kind) }}</option>
+{% endfor %}
+</select>
+</label>
+<label>{{ t('amount') }} · {{ settings.currency }}<input name="amount" inputmode="decimal" value="{{ values.get('amount','') }}" placeholder="0.00" required aria-describedby="amount-hint">
+<small id="amount-hint">{{ t('amount_hint') }}</small>
+</label>
+<label>{{ t('category') }}<select name="category_id" id="transaction-category" required>
+<option value="">{{ t('choose_category') }}</option>
+{% for category in categories %}
+<option value="{{ category.id }}" data-type="{{ category.type }}" {{ 'selected' if values.get('category_id') == category.id|string }}>{{ category_label(category) }} · {{ t(category.type) }}</option>
+{% endfor %}
+</select>
+</label>
+<label>{{ t('date') }}<input name="date" type="date" value="{{ values.get('date',today.isoformat()) }}" required>
+</label>
+<label class="full-width">{{ t('description') }}<textarea name="description" rows="3" maxlength="250" placeholder="{{ t('description_placeholder') }}">{{ values.get('description','') }}</textarea>
+</label>
+<div class="form-actions full-width">
+<a class="button" href="{{ url_for('transactions.index') }}">{{ t('cancel') }}</a>
+<button class="button primary">{{ t('save') }}{{ icon('arrow') }}</button>
+</div>
+</form>
+</article>
+{% endblock %}

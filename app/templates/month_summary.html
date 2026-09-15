@@ -1,0 +1,15 @@
+<section class="month-summary card">
+  <div class="card-heading"><h2>{{ t('month.summary') }}</h2><span class="muted">{{ month }}</span></div>
+  <div class="summary-values">
+    <div><span>{{ t('income') }}</span><strong>{{ summary.income|money }}</strong></div>
+    <div><span>{{ t('expense') }}</span><strong>{{ summary.expenses|money }}</strong></div>
+    <div><span>{{ t('net') }}</span><strong>{{ summary.savings|money }}</strong></div>
+    <div><span>{{ t('average_daily') }}</span><strong>{{ monthly.average|money }}</strong></div>
+    <div><span>{{ t('month.days_remaining') }}</span><strong>{{ monthly.days_remaining }}</strong></div>
+    <div><span>{{ t('month.estimate') }}</span><strong>{{ monthly.estimated|money if monthly.estimated is not none else '—' }}</strong></div>
+  </div>
+  <p class="summary-note muted">{{ t('month.estimate_hint') }}</p>
+</section>
+{% if alerts %}
+<section class="budget-alerts card"><h2>{{ t('budget.alerts') }}</h2>{% for item in alerts %}<a href="{{ url_for('budgets.index',month=month) }}"><span>{{ icon('budgets') }} {{ category_label(item.budget.category) }}</span><span class="{{ item.status }}">{% if item.status == 'over_budget' %}{{ t('budget.exceeded',amount=(item.spent-item.budget.amount_cents)|money) }}{% else %}{{ t('budget.used',percent=item.percent) }}{% endif %}</span></a>{% endfor %}</section>
+{% endif %}

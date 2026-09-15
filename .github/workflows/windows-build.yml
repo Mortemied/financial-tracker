@@ -1,0 +1,36 @@
+name: Windows portable build
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          architecture: x64
+      - name: Build and package
+        shell: cmd
+        env:
+          FT_NONINTERACTIVE: '1'
+        run: build.bat
+      - name: Run standalone smoke
+        shell: pwsh
+        run: |
+          $env:FINANCIAL_TRACKER_DATA_DIR = Join-Path $env:RUNNER_TEMP 'tracker-smoke'
+          $process = Start-Process -FilePath '.\dist\FinancialTracker\FinancialTracker.exe' -ArgumentList '--smoke','--no-browser' -WindowStyle Hidden -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw 'Standalone executable failed' }
+          $result = Get-Content (Join-Path $env:FINANCIAL_TRACKER_DATA_DIR 'smoke-result.json') | ConvertFrom-Json
+          if (-not $result.ok -or -not $result.frozen) { throw 'Packaged smoke failed' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FinancialTracker-Windows
+          path: |
+            release/*.zip
+            release/*.sha256
+          if-no-files-found: error

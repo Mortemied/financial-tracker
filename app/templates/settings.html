@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% from 'components.html' import csrf, icon with context %}
+{% block content %}
+<section class="page-heading">
+<div>
+<div class="eyebrow">{{ t('local_workspace') }}</div>
+<h1>{{ t('nav.settings') }}</h1>
+<p>{{ t('settings_subtitle') }}</p>
+</div>
+</section>
+<div class="split-layout">
+<article class="card form-card">
+<div class="card-heading">
+<h2>{{ t('preferences') }}</h2>{{ icon('settings') }}</div>
+<form method="post" class="settings-form">{{ csrf() }}<label>{{ t('language') }}<select name="language">
+{% for code,label in languages.items() %}
+<option value="{{ code }}" {{ 'selected' if settings.language == code }}>{{ label }}</option>
+{% endfor %}
+</select>
+</label>
+<label>{{ t('currency') }}<select name="currency">
+{% for currency in currencies %}
+<option value="{{ currency }}" {{ 'selected' if settings.currency == currency }}>{{ currency }}</option>
+{% endfor %}
+</select>
+<small>{{ t('currency_hint') }}</small>
+</label>
+<fieldset>
+<legend>{{ t('theme') }}</legend>
+<div class="theme-options">
+{% for theme in ['light','dark'] %}
+<label class="theme-option">
+<input type="radio" name="theme" value="{{ theme }}" {{ 'checked' if settings.theme == theme }}>
+<span class="theme-preview {{ theme }}">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span>{{ icon('sun' if theme == 'light' else 'moon') }}{{ t(theme) }}</span>
+</label>
+{% endfor %}
+</div>
+</fieldset>
+<div class="form-actions">
+<button class="button primary">{{ t('save') }}{{ icon('arrow') }}</button>
+</div>
+</form>
+</article>
+<aside class="info-panel">
+<span class="brand-icon">{{ icon('leaf') }}</span>
+<h2>{{ t('local_workspace') }}</h2>
+<p>{{ t('privacy_note') }}</p>
+</aside>
+</div>
+{% include 'backup_section.html' %}
+{% include 'about.html' %}
+{% endblock %}

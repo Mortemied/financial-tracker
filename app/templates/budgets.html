@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% from 'components.html' import csrf, icon, stat, month_filter with context %}
+{% block content %}
+<section class="page-heading">
+<div>
+<div class="eyebrow">{{ t('local_workspace') }}</div>
+<h1>{{ t('nav.budgets') }}</h1>
+<p>{{ t('budgets_subtitle') }}</p>
+</div>{{ month_filter(month) }}</section>
+<div class="budget-copy-action"><a class="button" href="{{ url_for('budgets.copy',month=month) }}">{{ t('budget.copy') }}</a></div>
+<section class="stats-grid three">{{ stat('allocated',allocated,'budgets') }}{{ stat('spent',spent,'expense') }}{{ stat('remaining',allocated-spent,'savings') }}</section>
+<div class="split-layout">
+<article class="card budget-list">
+<div class="card-heading">
+<h2>{{ t('nav.budgets') }}</h2>
+<span class="muted">{{ month }}</span>
+</div>
+{% for row in rows %}
+<div class="budget-row">
+<div class="budget-title">
+<span class="category-symbol" style="--category-color:{{ row.budget.category.color }}">{{ icon('budgets') }}</span>
+<div>
+<h3>{{ category_label(row.budget.category) }}</h3>
+<span class="budget-status {{ row.status }}">{{ t(row.status) }}</span>
+</div>
+<strong class="budget-percent {{ row.status }}">{{ t('budget.used',percent=row.percent) }}</strong>
+</div>
+<div class="budget-amount">
+<strong>{{ row.spent|money }}</strong>
+<span class="muted"> / {{ row.budget.amount_cents|money }}</span>
+</div>
+<div class="progress-track" role="progressbar" aria-label="{{ category_label(row.budget.category) }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ [row.percent,100]|min }}" aria-valuetext="{{ row.percent }}%">
+<span class="{{ row.status }}" style="width:{{ [row.percent,100]|min }}%">
+</span>
+</div>
+<p class="budget-remaining">{{ t('remaining') }}: {{ (row.budget.amount_cents-row.spent)|money }}</p>
+<details class="budget-edit">
+<summary>{{ t('edit') }}</summary>
+<form method="post" class="inline-form">{{ csrf() }}<input type="hidden" name="category_id" value="{{ row.budget.category_id }}">
+<input type="hidden" name="month" value="{{ month }}">
+<label>{{ t('budget_limit') }}<input name="amount" inputmode="decimal" value="{{ '%.2f'|format(row.budget.amount_cents/100) }}" required>
+</label>
+<button class="button">{{ t('save') }}</button>
+</form>
+<form action="{{ url_for('budgets.delete',budget_id=row.budget.id) }}" method="post" data-confirm>{{ csrf() }}<button class="button danger">{{ t('delete') }}</button>
+</form>
+</details>
+</div>
+{% else %}
+<div class="empty-state">{{ icon('budgets') }}<h3>{{ t('no_budgets') }}</h3>
+<p>{{ t('no_budgets_hint') }}</p>
+</div>
+{% endfor %}
+</article>
+<aside class="card side-form">
+<h2>{{ t('add_budget') }}</h2>
+<p class="muted">{{ t('budget_hint') }}</p>
+<form method="post" class="stack-form">{{ csrf() }}<label>{{ t('month') }}<input type="month" name="month" value="{{ month }}" required>
+</label>
+<label>{{ t('category') }}<select name="category_id" required>
+{% for category in categories %}
+<option value="{{ category.id }}">{{ category_label(category) }}</option>
+{% endfor %}
+</select>
+</label>
+<label>{{ t('budget_limit') }} · {{ settings.currency }}<input name="amount" placeholder="0.00" inputmode="decimal" required>
+</label>
+<button class="button primary">{{ icon('plus') }}{{ t('save') }}</button>
+</form>
+</aside>
+</div>
+{% endblock %}

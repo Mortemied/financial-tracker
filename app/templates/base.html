@@ -1,0 +1,122 @@
+{% from 'components.html' import icon, csrf with context %}
+<!doctype html>
+<html lang="{{ settings.language if settings else 'en' }}" data-theme="{{ settings.theme if settings else 'light' }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="{{ t('dashboard_subtitle') }}">
+<title>
+{% block title %}{{ t('nav.' ~ (active|default('dashboard'))) }}{% endblock %} · {{ t('app_name') }}</title>
+<link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/v2.css') }}">
+<script src="{{ url_for('static', filename='js/app.js') }}" defer>
+</script>
+{% block head %}
+{% endblock %}
+</head>
+<body>
+<a class="skip-link" href="#main">{{ t('skip') }}</a>
+<aside class="sidebar" id="sidebar">
+<a class="brand" href="{{ url_for('dashboard.index') }}">
+<span class="brand-icon">{{ icon('leaf') }}</span>{{ t('app_name') }}<span class="brand-dot">
+</span>
+</a>
+<p class="workspace-label">{{ t('workspace') }}</p>
+<nav aria-label="{{ t('menu') }}">
+{% for name in ['dashboard','transactions','categories','analytics','budgets','goals','transfer','settings'] %}
+<a href="{{ url_for(name ~ '.index') }}" aria-label="{{ t('nav.' ~ name) }}" class="nav-link {{ 'active' if active|default('') == name else '' }}" {% if active|default('') == name %}aria-current="page"{% endif %}>{{ icon(name) }}<span>{{ t('nav.' ~ name) }}</span>
+{% if name == 'dashboard' %}
+<span class="nav-indicator">
+</span>
+{% endif %}
+</a>
+{% endfor %}
+</nav>
+<div class="habit-card">
+<div class="plant">
+<span class="plant-leaf leaf-one">
+</span>
+<span class="plant-leaf leaf-two">
+</span>
+<span class="plant-stem">
+</span>
+<span class="plant-pot">
+</span>
+</div>
+<h3>{{ t('habit_title') }}</h3>
+<p>{{ t('habit_text') }}</p>
+<a href="{{ url_for('analytics.index') }}">{{ t('habit_link') }} {{ icon('arrow') }}</a>
+</div>
+<div class="sidebar-footer">
+<span class="status-dot">
+</span>{{ t('local_workspace') }}</div>
+</aside>
+<div class="shell">
+<header class="topbar">
+<button class="icon-button mobile-menu" type="button" aria-label="{{ t('menu') }}" aria-controls="sidebar" aria-expanded="false" id="menu-button">{{ icon('menu') }}</button>
+<form class="global-search" action="{{ url_for('transactions.index') }}">{{ icon('search') }}<label class="sr-only" for="global-q">{{ t('search_label') }}</label>
+<input id="global-q" name="q" placeholder="{{ t('search') }}" autocomplete="off">
+<button class="search-submit" aria-label="{{ t('apply') }}">{{ icon('arrow') }}</button>
+</form>
+<div class="topbar-actions">
+{% if settings %}
+<div class="language-switch">
+{% for lang in languages %}
+<form method="post" action="{{ url_for('settings.index') }}">{{ csrf() }}<input type="hidden" name="language" value="{{ lang }}">
+<input type="hidden" name="next" value="{{ request.full_path }}">
+<button class="{{ 'selected' if settings.language == lang else '' }}" aria-label="{{ languages[lang] }}" aria-pressed="{{ 'true' if settings.language == lang else 'false' }}">{{ lang|upper }}</button>
+</form>
+{% endfor %}
+</div>
+<form action="{{ url_for('settings.index') }}" method="post">{{ csrf() }}<input type="hidden" name="theme" value="{{ 'dark' if settings.theme == 'light' else 'light' }}">
+<input type="hidden" name="next" value="{{ request.full_path }}">
+<button class="icon-button theme-toggle" aria-label="{{ t('toggle_theme') }}">{{ icon('moon' if settings.theme == 'light' else 'sun') }}</button>
+</form>
+<span class="topbar-divider">
+</span>
+<a class="avatar" href="{{ url_for('settings.index') }}" aria-label="{{ t('nav.settings') }}">{{ icon('leaf') }}</a>
+{% endif %}
+</div>
+</header>
+<main id="main">
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for kind, message in messages %}
+<div class="flash {{ kind }}" role="{{ 'alert' if kind == 'error' else 'status' }}">
+{% if kind == 'undo' %}
+<span>{{ message.text }}</span><form method="post" action="{{ url_for('transactions.undo') }}" class="undo-form" data-undo-seconds="20">{{ csrf() }}<input type="hidden" name="token" value="{{ message.token }}"><button class="button">{{ t('undo') }}</button></form>
+{% else %}<span>{{ message }}</span>{% endif %}
+<button type="button" class="dismiss-flash icon-button" aria-label="{{ t('close') }}">×</button>
+</div>
+{% endfor %}
+{% endwith %}
+{% block content %}
+{% endblock %}
+<footer class="page-footer">
+<span>{{ t('app_name') }} · {{ app_version }}</span>
+<span>{{ t('habit_text') }}</span>
+</footer>
+</main>
+</div>
+<nav class="bottom-nav" aria-label="{{ t('menu') }}">
+{% for name in ['dashboard','transactions','analytics','budgets'] %}
+<a class="{{ 'active' if active|default('') == name else '' }}" href="{{ url_for(name ~ '.index') }}">{{ icon(name) }}<span>{{ t('nav.' ~ name) }}</span>
+</a>
+{% endfor %}
+</nav>
+<dialog id="confirm-dialog" aria-labelledby="confirm-title">
+<div class="dialog-icon">{{ icon('delete') }}</div>
+<h2 id="confirm-title">{{ t('confirm_title') }}</h2>
+<p>{{ t('confirm_delete') }}</p>
+<div class="form-actions">
+<button class="button" type="button" id="confirm-cancel">{{ t('cancel') }}</button>
+<button class="button destructive" type="button" id="confirm-delete">{{ t('delete') }}</button>
+</div>
+</dialog>
+{% if settings %}{% include 'quick_add.html' %}{% endif %}
+<script src="{{ url_for('static',filename='js/v2.js') }}" defer></script>
+{% block scripts %}
+{% endblock %}
+</body>
+</html>

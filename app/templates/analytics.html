@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% from 'components.html' import icon, stat, chart with context %}
+{% block content %}
+<section class="page-heading">
+<div>
+<div class="eyebrow">{{ t('overview') }}</div>
+<h1>{{ t('nav.analytics') }}</h1>
+<p>{{ t('analytics_subtitle') }}</p>
+</div>
+</section>
+<form class="card filter-bar analytics-filter">
+<label>{{ t('period') }}<select name="period" id="analytics-period">
+{% for period in ['this_month','last_month','last_3','last_6','this_year','custom'] %}
+<option value="{{ period }}" {{ 'selected' if request.args.get('period','this_month') == period }}>{{ t('period.' ~ period) }}</option>
+{% endfor %}
+</select>
+</label>
+<label class="custom-period">{{ t('start') }}<input type="date" name="start" value="{{ start.isoformat() }}">
+</label>
+<label class="custom-period">{{ t('end') }}<input type="date" name="end" value="{{ end.isoformat() }}">
+</label>
+<button class="button primary">{{ t('apply') }}</button>
+<span class="range-label muted">{{ start|localdate }} — {{ end|localdate }}</span>
+</form>
+<section class="stats-grid">{{ stat('total_income',summary.income,'income') }}{{ stat('total_expenses',summary.expenses,'expense') }}{{ stat('savings',summary.savings,'savings') }}{{ stat('average_daily',summary.average,'analytics') }}</section>
+<section class="analytics-highlights">
+<div class="card highlight">
+<span class="muted">{{ t('biggest_expense') }}</span>
+<strong>{{ summary.biggest.amount_cents|money if summary.biggest else '—' }}</strong>
+<span>{{ summary.biggest.description if summary.biggest else t('no_data') }}</span>
+</div>
+<div class="card highlight">
+<span class="muted">{{ t('top_category') }}</span>
+<strong>{{ category_label(category_map[summary.categories[0][0]]) if summary.categories else '—' }}</strong>
+<span>{{ summary.categories[0][1]|money if summary.categories else t('no_data') }}</span>
+</div>
+</section>
+<section class="charts-grid analytics-charts">{{ chart('breakdown','breakdown') }}{{ chart('comparison','comparison') }}{{ chart('trend','trend') }}{{ chart('savings','monthly_savings') }}</section>
+<article class="insights-card">
+<div class="insights-icon">{{ icon('analytics') }}</div>
+<div>
+<h2>{{ t('insights') }}</h2>
+{% for insight in summary.insights %}
+<p>
+{% if insight.category_id %}
+<strong>{{ category_label(category_map[insight.category_id]) }}. </strong>
+{% endif %}{{ t(insight.key,**insight.params) }}</p>
+{% endfor %}
+</div>
+</article>
+{% endblock %}
+{% block scripts %}
+{% include 'chart_scripts.html' %}
+{% endblock %}

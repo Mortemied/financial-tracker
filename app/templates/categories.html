@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% from 'components.html' import csrf, icon with context %}
+{% block content %}
+<section class="page-heading">
+<div>
+<div class="eyebrow">{{ t('local_workspace') }}</div>
+<h1>{{ t('nav.categories') }}</h1>
+<p>{{ t('categories_subtitle') }}</p>
+</div>
+</section>
+<div class="split-layout">
+<section>
+<div class="category-grid">
+{% for category in categories %}
+<article class="card category-card">
+<span class="category-symbol" style="--category-color:{{ category.color }}">{{ icon(category.type) }}</span>
+<div>
+<h2>{{ category_label(category) }}</h2>
+<p>{{ t(category.type) }} · {{ t('system_category' if category.key else 'custom_category') }}</p>
+</div>
+{% if not category.key %}
+<details class="category-edit">
+<summary>{{ t('edit') }}</summary>
+<form method="post" action="{{ url_for('categories.edit',category_id=category.id) }}" class="stack-form">{{ csrf() }}<label>{{ t('category_name') }}<input name="name" maxlength="80" value="{{ category.name }}" required>
+</label>
+<label>{{ t('type') }}<select name="type">
+{% for kind in ['expense','income'] %}
+<option value="{{ kind }}" {{ 'selected' if kind == category.type }}>{{ t(kind) }}</option>
+{% endfor %}
+</select>
+</label>
+<button class="button primary">{{ t('save') }}</button>
+</form>
+<form method="post" action="{{ url_for('categories.delete',category_id=category.id) }}" data-confirm>{{ csrf() }}<button class="button danger">{{ t('delete') }}</button>
+</form>
+</details>
+{% endif %}
+</article>
+{% endfor %}
+</div>
+</section>
+<aside class="card side-form">
+<h2>{{ t('add_category') }}</h2>
+<p class="muted">{{ t('category_hint') }}</p>
+<form method="post" class="stack-form">{{ csrf() }}<label>{{ t('category_name') }}<input name="name" maxlength="80" required>
+</label>
+<label>{{ t('type') }}<select name="type">
+<option value="expense">{{ t('expense') }}</option>
+<option value="income">{{ t('income') }}</option>
+</select>
+</label>
+<button class="button primary">{{ icon('plus') }}{{ t('add_category') }}</button>
+</form>
+</aside>
+</div>
+{% endblock %}

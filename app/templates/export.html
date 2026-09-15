@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% from 'components.html' import csrf, icon with context %}
+{% block content %}
+<section class="page-heading">
+<div>
+<div class="eyebrow">{{ t('local_workspace') }}</div>
+<h1>{{ t('nav.transfer') }}</h1>
+<p>{{ t('export_subtitle') }}</p>
+</div>
+<a class="button primary" href="{{ url_for('importing.index') }}">{{ t('csv.import') }}</a></section>
+<article class="card form-card">
+<div class="export-hero">
+<span class="export-icon">{{ icon('transfer') }}</span>
+<h2>{{ t('export_title') }}</h2>
+<p>{{ t('export_hint') }}</p>
+</div>
+<form action="{{ url_for('transfer.download') }}" class="form-grid">
+<label class="full-width">{{ t('type') }}<select name="type">
+<option value="">{{ t('all_types') }}</option>
+<option value="income">{{ t('income') }}</option>
+<option value="expense">{{ t('expense') }}</option>
+</select>
+</label>
+<label>{{ t('start') }}<input type="date" name="start">
+</label>
+<label>{{ t('end') }}<input type="date" name="end">
+</label>
+<p class="muted full-width">{{ t('export_period_hint') }}</p>
+<button class="button primary full-width">{{ icon('transfer') }}{{ t('download') }}</button>
+<small class="muted full-width">{{ t('csv_note') }}</small>
+</form>
+</article>
+{% endblock %}

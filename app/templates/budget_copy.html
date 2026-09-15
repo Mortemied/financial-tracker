@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% from 'components.html' import csrf with context %}
+{% block content %}
+<section class="page-heading"><div><h1>{{ t('budget.copy') }}</h1><p>{{ t('budget.copy_hint') }} · {{ month }}</p></div></section>
+<article class="card"><div class="table-scroll"><table><thead><tr><th>{{ t('category') }}</th><th>{{ t('budget_limit') }}</th><th>{{ t('status') }}</th></tr></thead><tbody>{% for row in rows %}<tr><td>{{ category_label(row.budget.category) }}</td><td>{{ row.budget.amount_cents|money }}</td><td>{{ t('budget.exists' if row.skip else 'csv.ready') }}</td></tr>{% else %}<tr><td colspan="3">{{ t('budget.no_previous') }}</td></tr>{% endfor %}</tbody></table></div>
+<form method="post" class="form-grid">{{ csrf() }}<input type="hidden" name="month" value="{{ month }}"><label class="check-label full-width"><input type="checkbox" name="confirmed" value="yes" required>{{ t('budget.confirm_copy') }}</label><div class="form-actions full-width"><a class="button" href="{{ url_for('budgets.index',month=month) }}">{{ t('cancel') }}</a><button class="button primary" {{ 'disabled' if not rows }}>{{ t('budget.copy') }}</button></div></form></article>
+{% endblock %}

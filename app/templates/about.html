@@ -1,0 +1,8 @@
+<section class="card about-section" aria-labelledby="about-title">
+  <div class="card-heading"><h2 id="about-title">{{ t('about.title') }}</h2><span class="badge">{{ t('about.version',version=app_version) }}</span></div>
+  <div class="about-body"><strong>{{ app_name }}</strong><p>{{ t('about.description') }}</p>
+  <p>{{ t('privacy.local') }}</p><p class="muted">{{ t('privacy.offline') }}</p>
+  <p>{{ t('about.license') }}: MIT</p>
+  {% if repository_url %}<a class="text-link" href="{{ repository_url }}" target="_blank" rel="noopener noreferrer">{{ t('about.repository') }}</a>{% endif %}
+  </div>
+</section>

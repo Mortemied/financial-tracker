@@ -1,0 +1,168 @@
+{% macro icon(name, cls='') -%}
+<svg class="icon {{ cls }}" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{% if name == 'dashboard' %}
+<path d="m3 10 9-7 9 7v10H3Z"/>
+<path d="M9 20v-7h6v7"/>
+{% elif name == 'transactions' %}
+<rect x="4" y="4" width="16" height="16" rx="3"/>
+<path d="M8 9h8m-8 6h8m-3-8 2 2-2 2m-2 2-2 2 2 2"/>
+{% elif name == 'categories' %}
+<rect x="3" y="3" width="7" height="7" rx="2"/>
+<rect x="14" y="3" width="7" height="7" rx="2"/>
+<rect x="3" y="14" width="7" height="7" rx="2"/>
+<rect x="14" y="14" width="7" height="7" rx="2"/>
+{% elif name == 'analytics' %}
+<path d="M4 3v17h17M8 15v-4m5 4V6m5 9V9"/>
+{% elif name == 'budgets' %}
+<rect x="4" y="5" width="16" height="16" rx="3"/>
+<path d="M9 5V3h6v2m-7 9 3 3 5-6"/>
+{% elif name == 'transfer' %}
+<path d="M5 12v8h14v-8M12 15V3m-4 4 4-4 4 4"/>
+{% elif name == 'settings' %}
+<path d="m10 3-1 3-3 1-3 3 2 2-1 4 3 2 3-1 2 4 3-2 1-3 4-1v-4l-3-2-1-4Z"/>
+<circle cx="12" cy="12" r="3"/>
+{% elif name == 'goals' %}<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>{% elif name == 'search' %}
+<circle cx="10.5" cy="10.5" r="6.5"/>
+<path d="m16 16 4 4"/>
+{% elif name == 'plus' %}
+<path d="M12 5v14M5 12h14"/>
+{% elif name == 'arrow' %}
+<path d="M4 12h16m-6-6 6 6-6 6"/>
+{% elif name == 'income' %}
+<path d="M12 20V4m-6 6 6-6 6 6"/>
+{% elif name == 'expense' %}
+<path d="M12 4v16m-6-6 6 6 6-6"/>
+{% elif name == 'balance' %}
+<rect x="3" y="5" width="18" height="15" rx="3"/>
+<path d="M3 9h18m-5 5h2"/>
+{% elif name == 'savings' %}
+<path d="M4 10h16v10H4Zm2 0V6h12v4m-6 3v4M8 3h8"/>
+{% elif name == 'moon' %}
+<path d="M20 15A9 9 0 0 1 9 4a9 9 0 1 0 11 11Z"/>
+{% elif name == 'sun' %}
+<circle cx="12" cy="12" r="4"/>
+<path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1 1m12 12 1 1M5 19l1-1M18 6l1-1"/>
+{% elif name == 'edit' %}
+<path d="m14 5 5 5M4 20l5-1L21 7l-5-5L4 14Z"/>
+{% elif name == 'delete' %}
+<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/>
+{% elif name == 'menu' %}
+<path d="M4 6h16M4 12h16M4 18h16"/>
+{% elif name == 'leaf' %}
+<path d="M20 3C9 2 2 8 5 15s17 4 15-12Z" fill="currentColor" stroke="none"/>
+<path d="M5 21 15 9" stroke="var(--surface)"/>
+{% else %}
+<circle cx="12" cy="12" r="8"/>
+<path d="M12 8v5m0 3v.1"/>
+{% endif %}
+</svg>
+{%- endmacro %}
+
+{% macro csrf() %}
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{% endmacro %}
+
+{% macro stat(label, value, symbol, note='', extra='') %}
+<article class="stat-card {{ extra }}">
+<div class="stat-top">
+<span>{{ t(label) }}</span>
+<span class="stat-icon {{ symbol }}">{{ icon(symbol) }}</span>
+</div>
+<div class="stat-value">{{ value|money }}</div>
+<div class="stat-note">
+{% if symbol == 'savings' %}
+<span class="positive">{{ icon('income') }}</span>
+{% endif %}{{ t(note) if note else '' }}</div>
+</article>
+{% endmacro %}
+
+{% macro transaction_table(rows, editable=false) %}
+{% if rows %}
+<div class="table-scroll">
+<table class="{{ 'transaction-table' if editable else '' }}">
+<thead>
+<tr>
+<th>{{ t('description') }}</th>
+<th>{{ t('category') }}</th>
+<th>{{ t('date') }}</th>
+{% if editable %}
+<th>{{ t('type') }}</th>
+{% endif %}
+<th class="align-right">{{ t('amount') }}</th>
+{% if editable %}
+<th class="align-right">{{ t('actions') }}</th>
+{% endif %}
+</tr>
+</thead>
+<tbody>
+{% for row in rows %}
+<tr>
+<td>
+<div class="description-cell">
+<span class="transaction-icon {{ row.type }}">{{ icon(row.type) }}</span>
+<span>{{ row.description or category_label(row.category) }}</span>
+</div>
+</td>
+<td>
+<span class="category-dot" style="--category-color:{{ row.category.color }}">
+</span>{{ category_label(row.category) }}</td>
+<td class="muted nowrap">{{ row.date|localdate }}</td>
+{% if editable %}
+<td>
+<span class="badge {{ row.type }}">{{ t(row.type) }}</span>
+</td>
+{% endif %}
+<td class="align-right amount {{ row.type }}">{{ '+' if row.type == 'income' else '−' }}{{ row.amount_cents|money }}</td>
+{% if editable %}
+<td>
+<div class="row-actions">
+<a class="icon-button" href="{{ url_for('transactions.edit', transaction_id=row.id) }}" aria-label="{{ t('edit') }}">{{ icon('edit') }}</a>
+<a class="icon-button" href="{{ url_for('transactions.duplicate',transaction_id=row.id) }}" aria-label="{{ t('duplicate') }}" title="{{ t('duplicate') }}">{{ icon('plus') }}</a>
+<form method="post" action="{{ url_for('transactions.delete', transaction_id=row.id) }}">{{ csrf() }}<button class="icon-button danger" aria-label="{{ t('delete') }}">{{ icon('delete') }}</button>
+</form>
+</div>
+</td>
+{% endif %}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% else %}
+<div class="empty-state">{{ icon('transactions') }}<h3>{{ t('empty_transactions') }}</h3>
+<p>{{ t('empty_hint') }}</p>
+<a class="button primary" href="{{ url_for('transactions.edit') }}">{{ icon('plus') }}{{ t('add_transaction') }}</a>
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro chart(id, title, subtitle='') %}
+<article class="card chart-card">
+<div class="card-heading">
+<div>
+<h2>{{ t(title) }}</h2>
+{% if subtitle %}
+<p>{{ t(subtitle) }}</p>
+{% endif %}
+</div>
+</div>
+<div class="chart-wrap">
+<canvas id="{{ id }}" role="img" aria-label="{{ t(title) }}">
+</canvas>
+<p class="chart-empty" hidden>{{ t('no_data') }}</p>
+</div>
+<details class="chart-accessible">
+<summary>{{ t('chart_data') }}</summary>
+<div class="chart-data-table">
+</div>
+</details>
+</article>
+{% endmacro %}
+
+{% macro month_filter(month) %}
+<form class="month-filter" method="get">
+<label class="sr-only" for="month">{{ t('month') }}</label>
+<input id="month" type="month" name="month" value="{{ month }}" required>
+<button class="icon-button" aria-label="{{ t('apply') }}">{{ icon('arrow') }}</button>
+</form>
+{% endmacro %}

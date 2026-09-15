@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% from 'components.html' import icon, stat, chart, month_filter, transaction_table with context %}
+{% block content %}
+<section class="page-heading">
+<div>
+<div class="eyebrow">{{ t('overview') }}</div>
+<h1>{{ t('welcome') }}</h1>
+<p>{{ t('dashboard_subtitle') }}</p>
+</div><div class="heading-actions">{{ month_filter(month) }}<button type="button" class="button primary" data-quick-open>{{ icon('plus') }}{{ t('add_transaction') }}</button></div></section>
+<section class="stats-grid">{{ stat('balance',balance,'balance','all_time','balance-card') }}{% for key,symbol,label in [('income','income','income_month'),('expenses','expense','expense_month')] %}<article class="stat-card"><div class="stat-top"><span>{{ t(label) }}</span><span class="stat-icon {{ symbol }}">{{ icon(symbol) }}</span></div><div class="stat-value">{{ summary[key]|money }}</div><div class="stat-note">{% set change=monthly.comparison[key] %}{% if change is not none %}<span>{{ '↑' if change>0 else ('↓' if change<0 else '→') }} {{ t('month.comparison',percent=change|abs|localnumber) }}</span>{% else %}{{ t('month.no_comparison') }}{% endif %}</div></article>{% endfor %}{{ stat('net_month',summary.savings,'savings','income_minus_expenses') }}</section>
+{% include 'month_summary.html' %}
+<section class="charts-grid">{{ chart('breakdown','breakdown','selected_month') }}{{ chart('comparison','comparison','chart_period') }}</section>
+<section class="lower-grid">
+<article class="card recent-card">
+<div class="card-heading">
+<h2>{{ t('recent') }}</h2>
+<a class="text-link" href="{{ url_for('transactions.index', start=start.isoformat(), end=end.isoformat()) }}">{{ t('view_all') }}{{ icon('arrow') }}</a>
+</div>{{ transaction_table(recent) }}</article>{{ chart('balance','balance_history','chart_period') }}</section>
+{% endblock %}
+{% block scripts %}
+{% include 'chart_scripts.html' %}
+{% endblock %}

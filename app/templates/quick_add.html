@@ -1,0 +1,15 @@
+<button class="button primary quick-add-global" type="button" data-quick-open aria-label="{{ t('add_transaction') }}">{{ icon('plus') }}<span>{{ t('add_transaction') }}</span></button>
+<dialog id="quick-dialog" aria-labelledby="quick-title">
+  <div class="card-heading"><h2 id="quick-title">{{ t('add_transaction') }}</h2><button type="button" class="icon-button" data-quick-close aria-label="{{ t('close') }}">×</button></div>
+  <form action="{{ url_for('transactions.quick') }}" method="post" class="form-grid" id="quick-form">
+    {{ csrf() }}
+    <p class="flash error full-width" id="quick-error" role="alert" hidden></p>
+    <label>{{ t('type') }}<select name="type" id="quick-type"><option value="expense">{{ t('expense') }}</option><option value="income">{{ t('income') }}</option></select></label>
+    <label>{{ t('amount') }} · {{ settings.currency }}<input name="amount" inputmode="decimal" placeholder="0.00" required autofocus></label>
+    <label>{{ t('category') }}<select name="category_id" id="quick-category" required><option value="">{{ t('choose_category') }}</option>{% for category in quick_categories %}<option value="{{ category.id }}" data-type="{{ category.type }}">{{ category_label(category) }}</option>{% endfor %}</select></label>
+    <label>{{ t('date') }}<input name="date" type="date" value="{{ today.isoformat() }}" required></label>
+    <label class="full-width">{{ t('description') }}<input name="description" maxlength="250" placeholder="{{ t('description_placeholder') }}"></label>
+    <div class="form-actions full-width"><button class="button" type="button" data-quick-close>{{ t('cancel') }}</button><button class="button primary" id="quick-submit" data-loading="{{ t('loading') }}">{{ t('save') }}</button></div>
+  </form>
+</dialog>
+<div hidden id="v2-messages" data-network="{{ t('error.network') }}" data-undo-expired="{{ t('error.undo_expired') }}"></div>

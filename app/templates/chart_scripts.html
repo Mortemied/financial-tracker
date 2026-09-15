@@ -1,0 +1,6 @@
+<div id="chart-config" hidden data-chart="{{ chart_data|tojson|forceescape }}" data-currency="{{ settings.currency }}" data-locale="{{ settings.language }}">
+</div>
+<script src="{{ url_for('static', filename='vendor/chart.umd.min.js') }}" defer>
+</script>
+<script src="{{ url_for('static', filename='js/charts.js') }}" defer>
+</script>
